@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Maestros - El Tayta</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body class="bg-slate-50 dark:bg-[#101a22] text-slate-900 dark:text-white font-display">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-[#623724] flex flex-col shrink-0 border-r border-white/10 shadow-xl">
+            <div class="p-6 flex items-center gap-4">
+                <img src="/img/logo.png" alt="Logo"
+                    class="size-11 rounded-lg border border-white/20 object-cover bg-white">
+                <div>
+                    <h1 class="text-white text-lg font-black leading-tight tracking-tighter">El Tayta</h1>
+                    <p class="text-white/50 text-[10px] uppercase font-bold tracking-widest">Admin Panel</p>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 mt-6 space-y-1">
+                <a href="/dashboard"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:bg-white/5 hover:text-white transition-all">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+                <div class="pt-6 pb-2 px-4 text-[10px] font-bold text-white/30 uppercase tracking-[2px]">Maestros</div>
+                <a href="/maestros"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white border-l-4 border-sky-400">
+                    <span class="material-symbols-outlined">database</span>
+                    <span class="text-sm font-bold">Gestión de Datos</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Contenido con Pestañas -->
+        <main class="flex-1 flex flex-col">
+            <header
+                class="h-16 flex items-center justify-between px-8 bg-white dark:bg-[#101a22] border-b border-slate-200 dark:border-slate-800">
+                <h2 class="font-bold text-slate-500 uppercase tracking-widest text-xs">Mantenimiento de Tablas</h2>
+                <div id="userInfo" class="text-xs font-bold text-sky-500"></div>
+            </header>
+
+            <div class="p-8">
+                <!-- Pestañas -->
+                <div class="flex border-b border-slate-200 dark:border-slate-800 gap-8 mb-8">
+                    <button onclick="changeTab('clientes')" id="tab-clientes"
+                        class="pb-4 text-xs font-black tracking-widest border-b-2 border-sky-400 text-sky-400 uppercase">Clientes</button>
+                    <button onclick="changeTab('proveedores')" id="tab-proveedores"
+                        class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Proveedores</button>
+                    <button onclick="changeTab('empleados')" id="tab-empleados"
+                        class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Empleados</button>
+                    <button onclick="changeTab('productos')" id="tab-productos"
+                        class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Productos</button>
+                </div>
+
+                <!-- Herramientas: Buscar y Agregar -->
+                <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+                    <div class="relative flex-1 max-w-md">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                        <input type="text" id="searchInput" onkeyup="loadData()" placeholder="Buscar..."
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-2 focus:ring-sky-400 transition-all outline-none">
+                    </div>
+                    <button onclick="handleNewRecord()" id="btnNew"
+                        class="px-6 py-2.5 bg-sky-500 text-white text-xs font-black rounded-xl hover:bg-sky-600 transition-all shadow-lg shadow-sky-500/20 uppercase tracking-widest whitespace-nowrap">
+                        + Nuevo Cliente
+                    </button>
+                </div>
+
+                <!-- Tabla -->
+                <div
+                    class="bg-white dark:bg-[#1c2833] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead
+                                class="bg-slate-50 dark:bg-white/5 text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                                <tr id="tableHeader">
+                                    <!-- Se llena por JS -->
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- MODAL PARA NUEVO CLIENTE -->
+        <div id="clientModal"
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div
+                class="bg-white dark:bg-[#1c2833] w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div
+                    class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
+                    <h3 class="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Registrar
+                        Nuevo Cliente</h3>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <form id="clientForm" class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input type="hidden" id="clientId" name="clientId">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Tipo Doc.</label>
+                        <select name="tipoDoc"
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                            <option value="1">DNI</option>
+                            <option value="6">RUC</option>
+                            <option value="4">C.E.</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Nro. Documento</label>
+                        <input type="text" name="documento" required
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Razón Social / Nombre
+                            Completo</label>
+                        <input type="text" name="razon" required
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Dirección</label>
+                        <input type="text" name="direccion"
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Celular</label>
+                        <input type="text" name="celular"
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Email</label>
+                        <input type="email" name="email"
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                    </div>
+                    <!-- Campo dinámico para Tipo de Empleado (Solo visible en Empleados) -->
+                    <div id="divTipoEmpleado" class="md:col-span-2 hidden">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Rol / Tipo de
+                            Empleado</label>
+                        <select id="selectTipoEmpleado" name="tipo"
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                            <!-- Se llena por JS -->
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 pt-4 flex gap-3">
+                        <button type="submit" id="btnSubmitForm"
+                            class="flex-1 py-3 bg-sky-500 text-white font-black rounded-xl hover:bg-sky-600 shadow-lg shadow-sky-500/20 uppercase tracking-widest text-xs">Guardar
+                            Cliente</button>
+                        <button type="button" onclick="closeModal()"
+                            class="px-8 py-3 bg-slate-100 dark:bg-slate-800 text-slate-500 font-black rounded-xl hover:bg-slate-200 uppercase tracking-widest text-xs">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentTab = 'clientes';
+        let tiposEmpleadoCache = [];
+
+        const labels = {
+            'clientes': { singular: 'Cliente', plural: 'Clientes' },
+            'proveedores': { singular: 'Proveedor', plural: 'Proveedores' },
+            'empleados': { singular: 'Empleado', plural: 'Empleados' },
+            'productos': { singular: 'Producto', plural: 'Productos' }
+        };
+
+        // --- FUNCIÓN DE INICIALIZACIÓN ROBUSTA ---
+        async function initSystem() {
+            console.log("Iniciando El Tayta System...");
+
+            // 1. Intentar cargar info de usuario
+            try {
+                const resU = await fetch('/api/user-info');
+                if (resU.ok) {
+                    const u = await resU.json();
+                    const ui = document.getElementById('userInfo');
+                    if (ui) ui.innerText = u.nombre ? u.nombre.toUpperCase() : "ADMIN TAYTA";
+                }
+            } catch (e) { console.warn("Error en user-info:", e); }
+
+            // 2. Pequeño retardo de 300ms para asegurar que el DOM y Express estén sincronizados
+            // Esto soluciona el problema de que cargue vacío al principio
+            setTimeout(async () => {
+                console.log("Ejecutando primera carga de datos...");
+                await changeTab('clientes');
+            }, 300);
+        }
+
+        // Evento de arranque
+        window.addEventListener('load', initSystem);
+
+        // --- FUNCIONES COMPLEMENTARIAS ---
+
+        async function loadData() {
+            const searchInput = document.getElementById('searchInput');
+            const search = searchInput ? searchInput.value : "";
+            const tbody = document.getElementById('tableBody');
+            const thead = document.getElementById('tableHeader');
+
+            if (!tbody || !thead) return;
+
+            // Renderizar Cabeceras
+            let headers = '';
+            if (currentTab === 'clientes') headers = '<th class="px-6 py-4">Documento</th><th class="px-6 py-4">Razón Social</th><th class="px-6 py-4">Dirección</th><th class="px-6 py-4">Celular</th>';
+            else if (currentTab === 'proveedores') headers = '<th class="px-6 py-4">RUC / Doc</th><th class="px-6 py-4">Proveedor</th><th class="px-6 py-4">Dirección</th><th class="px-6 py-4">Teléfono</th>';
+            else if (currentTab === 'empleados') headers = '<th class="px-6 py-4">DNI / Doc</th><th class="px-6 py-4">Empleado</th><th class="px-6 py-4">Cargo / Tipo</th><th class="px-6 py-4">Celular</th>';
+            else headers = '<th class="px-6 py-4">Código</th><th class="px-6 py-4">Descripción</th><th class="px-6 py-4">Categoría</th><th class="px-6 py-4">Precio</th>';
+
+            thead.innerHTML = headers + '<th class="px-6 py-4 text-right">Acciones</th>';
+            tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic animate-pulse">Cargando registros de ${currentTab}...</td></tr>`;
+
+            try {
+                const res = await fetch(`/api/${currentTab}?search=${encodeURIComponent(search)}`);
+                if (!res.ok) throw new Error("Error en respuesta");
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic">No se encontraron registros en ${currentTab}</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => {
+                    const id = item.Codclie || item.codclie || item.CodProv || item.codprov || item.Codemp || item.codemp || item.CodPro || '---';
+                    const nombre = item.Razon || item.razon || item.Nombre || item.nombre || '---';
+                    const doc = item.Documento || item.documento || item.CodPro || '---';
+                    const col3 = item.Direccion || item.direccion || item.Direc1 || item.direc1 || item.TipoNombre || '---';
+                    const col4 = item.Celular || item.celular || item.Telefono1 || item.telefono1 || item.PventaMi || '---';
+
+                    return `<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-slate-800">
+                    <td class="px-6 py-4 font-bold text-sky-500">${doc}</td>
+                    <td class="px-6 py-4 font-medium">${nombre}</td>
+                    <td class="px-6 py-4 text-slate-400 text-xs">${col3}</td>
+                    <td class="px-6 py-4">${col4}</td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-2">
+                        <button onclick="openModal('${id}')" class="p-2 text-sky-500 hover:bg-sky-500/10 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button>
+                        <button onclick="deleteRecord('${id}', '${String(nombre).replace(/'/g, "\\'")}')" class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
+                    </td>
+                </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error("Fallo en loadData:", err);
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-400 italic">No se pudo cargar la información. Intente refrescar.</td></tr>`;
+            }
+        }
+
+        async function changeTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('button[id^="tab-"]').forEach(btn => {
+                btn.className = "pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all";
+            });
+            const active = document.getElementById('tab-' + tab);
+            if (active) active.className = "pb-4 text-xs font-black tracking-widest border-b-2 border-sky-400 text-sky-400 uppercase";
+
+            const btnNew = document.getElementById('btnNew');
+            if (btnNew) btnNew.innerText = "+ Nuevo " + labels[tab].singular;
+
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.placeholder = "Buscar en " + labels[tab].plural + "...";
+                searchInput.value = "";
+            }
+
+            await loadData();
+        }
+
+        async function openModal(id = null) {
+            const form = document.getElementById('clientForm');
+            const modalTitle = document.querySelector('#clientModal h3');
+            const btnSubmit = document.getElementById('btnSubmitForm');
+            const divTipo = document.getElementById('divTipoEmpleado');
+
+            form.reset();
+            document.getElementById('clientId').value = id || "";
+
+            if (currentTab === 'empleados') {
+                divTipo.classList.remove('hidden');
+                if (tiposEmpleadoCache.length === 0) {
+                    const resT = await fetch('/api/tipo-empleado');
+                    tiposEmpleadoCache = await resT.json();
+                    document.getElementById('selectTipoEmpleado').innerHTML = tiposEmpleadoCache.map(t => `<option value="${t.idTipo}">${t.descripcion}</option>`).join('');
+                }
+            } else { divTipo.classList.add('hidden'); }
+
+            if (id) {
+                modalTitle.innerText = `Editar ${labels[currentTab].singular}`;
+                btnSubmit.innerText = `Actualizar ${labels[currentTab].singular}`;
+                const res = await fetch(`/api/${currentTab}/${id}`);
+                const data = await res.json();
+
+                form.elements['tipoDoc'].value = data.tipoDoc || data.tipodoc || "1";
+                form.elements['documento'].value = data.Documento || data.documento || "";
+                form.elements['razon'].value = data.Razon || data.Nombre || data.razon || data.nombre || "";
+                form.elements['direccion'].value = data.Direccion || data.Direc1 || data.direccion || data.direc1 || "";
+                form.elements['celular'].value = data.Celular || data.Telefono1 || data.celular || data.telefono1 || "";
+                form.elements['email'].value = data.Email || data.email || "";
+                if (currentTab === 'empleados') form.elements['tipo'].value = data.Tipo || data.tipo || "";
+            } else {
+                modalTitle.innerText = `Nuevo ${labels[currentTab].singular}`;
+                btnSubmit.innerText = `Guardar ${labels[currentTab].singular}`;
+            }
+            document.getElementById('clientModal').classList.remove('hidden');
+        }
+
+        document.getElementById('clientForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('clientId').value;
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            if (currentTab === 'proveedores') data.telefono = data.celular;
+
+            const url = id ? `/api/${currentTab}/${id}` : `/api/${currentTab}`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert("Operación exitosa");
+                    closeModal();
+                    loadData();
+                } else { alert("Error al guardar"); }
+            } catch (err) { alert("Error de conexión"); }
+        };
+
+        function closeModal() { document.getElementById('clientModal').classList.add('hidden'); }
+        function handleNewRecord() { openModal(); }
+
+        async function deleteRecord(id, nombre) {
+            if (confirm(`¿Eliminar definitivamente a ${nombre}?`)) {
+                const res = await fetch(`/api/${currentTab}/delete/${id}`, { method: 'PATCH' });
+                if (res.ok) loadData();
+                else alert("Error al eliminar");
+            }
+        }        
+    </script>
+</body>
+
+</html>

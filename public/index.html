@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Acceso al Sistema El Tayta</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/css/styles.css">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eba800",
+                        "background-light": "#e7cea6",
+                        "background-dark": "#231d0f",
+                        "brand-brown": "#623724",
+                        "brand-gold": "#eda900",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div
+        class="bg-white dark:bg-[#1c1811] shadow-2xl rounded-2xl w-full max-w-[440px] overflow-hidden flex flex-col items-center p-10 border border-brand-brown/5">
+
+        <!-- Logotipo Oficial -->
+        <div
+            class="w-28 h-28 rounded-full mb-6 border-4 border-brand-gold overflow-hidden bg-white shadow-inner flex items-center justify-center">
+            <img src="/img/logo.png" alt="El Tayta Logo" class="w-full h-full object-cover">
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-brand-brown dark:text-white text-[28px] font-bold leading-tight">Acceso al Sistema</h1>
+            <p class="text-brand-brown/60 dark:text-white/60 text-sm mt-1">Gestión integral de restaurante</p>
+        </div>
+
+        <!-- Contenedor de Alertas -->
+        <div id="loginAlert"
+            class="w-full mb-6 hidden p-4 rounded-xl text-sm font-semibold border text-center transition-all duration-300">
+        </div>
+
+        <form id="loginForm" class="w-full space-y-5">
+            <div>
+                <label class="block text-brand-brown dark:text-white text-sm font-bold mb-2">Usuario</label>
+                <input id="userInput" type="text"
+                    class="form-input w-full rounded-xl border-2 border-brand-brown/20 bg-slate-50 dark:bg-transparent h-14 px-4 focus:border-brand-gold transition-all"
+                    placeholder="Ej: admin" required>
+            </div>
+
+            <div>
+                <label class="block text-brand-brown dark:text-white text-sm font-bold mb-2">Contraseña</label>
+                <div class="relative">
+                    <input id="passInput" type="password"
+                        class="form-input w-full rounded-xl border-2 border-brand-brown/20 bg-slate-50 dark:bg-transparent h-14 px-4 pr-12 focus:border-brand-gold transition-all"
+                        placeholder="••••••••" required>
+                    <button type="button" id="togglePass"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-gold">
+                        <span class="material-symbols-outlined" id="eyeIcon">visibility</span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full h-14 bg-brand-gold hover:bg-brand-brown hover:text-white text-brand-brown text-lg font-bold rounded-xl shadow-lg transition-all active:scale-95 mt-4">
+                Entrar al Sistema
+            </button>
+        </form>
+
+        <p class="mt-8 text-brand-brown/40 text-[11px] uppercase tracking-widest font-bold">El Tayta © 2026</p>
+        <p class="mt-2 text-brand-brown/40 text-[5px] uppercase tracking-widest font-bold">by 0denfis</p>
+    </div>
+
+    <script>
+        // Ver/Ocultar Contraseña
+        const togglePass = document.getElementById('togglePass');
+        const passInput = document.getElementById('passInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePass.onclick = () => {
+            const isPass = passInput.type === 'password';
+            passInput.type = isPass ? 'text' : 'password';
+            eyeIcon.innerText = isPass ? 'visibility_off' : 'visibility';
+        };
+
+        // Lógica de Login con Mensajes
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const alertBox = document.getElementById('loginAlert');
+            const usuario = document.getElementById('userInput').value;
+            const clave = document.getElementById('passInput').value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, clave })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alertBox.innerText = "✅ ¡Acceso Concedido! Entrando...";
+                    alertBox.className = "w-full mb-6 p-4 rounded-xl text-sm font-semibold border text-center bg-emerald-50 text-emerald-700 border-emerald-200 block scale-105";
+                    setTimeout(() => window.location.href = '/dashboard', 1200);
+                } else {
+                    alertBox.innerText = "❌ " + data.message;
+                    alertBox.className = "w-full mb-6 p-4 rounded-xl text-sm font-semibold border text-center bg-red-50 text-red-700 border-red-200 block";
+                }
+            } catch (err) {
+                alertBox.innerText = "⚠️ Error de conexión";
+                alertBox.className = "w-full mb-6 p-4 rounded-xl text-sm font-semibold border text-center bg-amber-50 text-amber-700 border-amber-200 block";
+            }
+        };
+    </script>
+</body>
+
+</html>

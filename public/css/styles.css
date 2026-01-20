@@ -1,0 +1,59 @@
+/* public/css/styles.css */
+
+/* Configuración General */
+body {
+    font-family: "Work Sans", "Inter", sans-serif;
+}
+
+/* Clases específicas del Sidebar (Dashboard) */
+.sidebar-item-active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #138aec;
+}
+
+/* Personalización de Material Symbols */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Personalización de Scrollbar para un look profesional */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #623724;
+    border-radius: 10px;
+}
+
+/* Efectos de transición */
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+/* Estilos adicionales para formularios */
+.form-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #eda900;
+}
+
+/* Pestañas */
+.tab-btn {
+    position: relative;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+/* Transición suave para el cambio de pestañas */
+#tableBody tr {
+    transition: background-color 0.2s;
+}
+
+#tableBody tr:hover {
+    background-color: rgba(19, 138, 236, 0.05);
+}
