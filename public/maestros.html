@@ -55,6 +55,10 @@
                         class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Proveedores</button>
                     <button onclick="changeTab('empleados')" id="tab-empleados"
                         class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Empleados</button>
+                    <button onclick="changeTab('lineas')" id="tab-lineas"
+                        class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Líneas</button>
+                    <button onclick="changeTab('clases')" id="tab-clases"
+                        class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Clases</button>
                     <button onclick="changeTab('productos')" id="tab-productos"
                         class="pb-4 text-xs font-black tracking-widest text-slate-400 hover:text-sky-400 uppercase transition-all">Productos</button>
                 </div>
@@ -151,6 +155,15 @@
                             <!-- Se llena por JS -->
                         </select>
                     </div>
+                    <!-- Selector de Línea para cuando se crea una Clase -->
+                    <div id="divLineaPadre" class="md:col-span-2 hidden">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Asociar a Línea
+                            (Categoría)</label>
+                        <select id="selectLineaPadre" name="codLineaPadre"
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                            <!-- Se llena por JS con las líneas existentes -->
+                        </select>
+                    </div>
                     <div class="md:col-span-2 pt-4 flex gap-3">
                         <button type="submit" id="btnSubmitForm"
                             class="flex-1 py-3 bg-sky-500 text-white font-black rounded-xl hover:bg-sky-600 shadow-lg shadow-sky-500/20 uppercase tracking-widest text-xs">Guardar
@@ -170,6 +183,8 @@
             'clientes': { singular: 'Cliente', plural: 'Clientes' },
             'proveedores': { singular: 'Proveedor', plural: 'Proveedores' },
             'empleados': { singular: 'Empleado', plural: 'Empleados' },
+            'lineas': { singular: 'Línea', plural: 'Líneas' },
+            'clases': { singular: 'Clase', plural: 'Clases' },
             'productos': { singular: 'Producto', plural: 'Productos' }
         };
 
@@ -199,7 +214,83 @@
         window.addEventListener('load', initSystem);
 
         // --- FUNCIONES COMPLEMENTARIAS ---
+        async function loadData() {
+            const searchInput = document.getElementById('searchInput');
+            const search = searchInput ? searchInput.value : "";
+            const tbody = document.getElementById('tableBody');
+            const thead = document.getElementById('tableHeader');
 
+            if (!tbody || !thead) return;
+
+            // 1. Configurar Cabeceras de Tabla
+            let headers = '';
+            if (currentTab === 'clientes') {
+                headers = '<th class="px-6 py-4">Documento</th><th class="px-6 py-4">Razón Social</th><th class="px-6 py-4">Dirección</th><th class="px-6 py-4">Celular</th>';
+            } else if (currentTab === 'proveedores') {
+                headers = '<th class="px-6 py-4">RUC / Doc</th><th class="px-6 py-4">Proveedor</th><th class="px-6 py-4">Dirección</th><th class="px-6 py-4">Teléfono</th>';
+            } else if (currentTab === 'empleados') {
+                headers = '<th class="px-6 py-4">DNI / Doc</th><th class="px-6 py-4">Empleado</th><th class="px-6 py-4">Cargo y Dirección</th><th class="px-6 py-4">Celular</th>';
+            } else if (currentTab === 'lineas') {
+                headers = '<th class="px-6 py-4">ID</th><th class="px-6 py-4">Nombre de Línea</th><th class="px-6 py-4"></th><th class="px-6 py-4"></th>';
+            } else if (currentTab === 'clases') {
+                headers = '<th class="px-6 py-4">ID</th><th class="px-6 py-4">Subcategoría (Clase)</th><th class="px-6 py-4">Pertenece a Línea</th><th class="px-6 py-4"></th>';
+            } else {
+                headers = '<th class="px-6 py-4">Código</th><th class="px-6 py-4">Descripción</th><th class="px-6 py-4">Categoría</th><th class="px-6 py-4">Precio</th>';
+            }
+            thead.innerHTML = headers + '<th class="px-6 py-4 text-right">Acciones</th>';
+
+            tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic animate-pulse">Buscando registros...</td></tr>`;
+
+            try {
+                const res = await fetch(`/api/${currentTab}?search=${encodeURIComponent(search)}`);
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic">No se encontraron registros en ${currentTab}</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => {
+                    // Mapeo de IDs (Añadimos item.ID para Lineas y Clases)
+                    const id = item.Codclie || item.codclie || item.CodProv || item.codprov || item.Codemp || item.codemp || item.CodPro || item.ID || '---';
+
+                    // Mapeo de Documento/ID visual (Añadimos item.ID)
+                    const doc = item.Documento || item.documento || item.CodPro || item.ID || '---';
+
+                    const nombre = item.Razon || item.razon || item.Nombre || item.nombre || '---';
+                    const fono = item.Celular || item.celular || item.Telefono1 || item.telefono1 || '---';
+
+                    // --- LÓGICA DE COLUMNA 3 ---
+                    let col3Content = '';
+                    if (currentTab === 'empleados') {
+                        col3Content = `
+                    <div class="font-bold text-slate-700 dark:text-slate-200">${item.TipoNombre || 'Sin Cargo'}</div>
+                    <div class="text-[10px] text-slate-400 truncate max-w-[200px]">${item.Direccion || 'Sin dirección'}</div>
+                `;
+                    } else {
+                        // Para Clases usamos item.LineaPadre, para el resto los demás campos
+                        const dir = item.LineaPadre || item.Direccion || item.direccion || item.Direc1 || item.direc1 || item.LineaNombre || '---';
+                        col3Content = `<div class="text-slate-400 text-xs">${dir}</div>`;
+                    }
+
+                    const col4Content = item.PventaMi || (currentTab === 'lineas' || currentTab === 'clases' ? '' : fono);
+
+                    return `<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-slate-800">
+                <td class="px-6 py-4 font-bold text-sky-500">${doc}</td>
+                <td class="px-6 py-4 font-medium">${nombre}</td>
+                <td class="px-6 py-4">${col3Content}</td>
+                <td class="px-6 py-4">${col4Content}</td>
+                <td class="px-6 py-4 text-right flex justify-end gap-2">
+                    <button onclick="openModal('${id}')" class="p-2 text-sky-500 hover:bg-sky-500/10 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button>
+                    <button onclick="deleteRecord('${id}', '${String(nombre).replace(/'/g, "\\'")}')" class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
+                </td>
+            </tr>`;
+                }).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-400 italic">Error de conexión.</td></tr>`;
+            }
+        }
+        /*
         async function loadData() {
             const searchInput = document.getElementById('searchInput');
             const search = searchInput ? searchInput.value : "";
@@ -250,7 +341,7 @@
                 console.error("Fallo en loadData:", err);
                 tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-400 italic">No se pudo cargar la información. Intente refrescar.</td></tr>`;
             }
-        }
+        }*/
 
         async function changeTab(tab) {
             currentTab = tab;
@@ -276,33 +367,93 @@
             const form = document.getElementById('clientForm');
             const modalTitle = document.querySelector('#clientModal h3');
             const btnSubmit = document.getElementById('btnSubmitForm');
+
+            if (!form) return;
+
             const divTipo = document.getElementById('divTipoEmpleado');
+            const divProd = document.getElementById('divProductos');
+            const divLinPadre = document.getElementById('divLineaPadre');
+
+            const getDiv = (name) => form.elements[name]?.closest('div');
+
+            const inputDocDiv = getDiv('documento');
+            const inputTipoDocDiv = getDiv('tipoDoc');
+            const inputDirDiv = getDiv('direccion');
+            const inputCelDiv = getDiv('celular');
+            const inputEmDiv = getDiv('email');
+            const labelRazon = getDiv('razon')?.querySelector('label');
 
             form.reset();
             document.getElementById('clientId').value = id || "";
 
-            if (currentTab === 'empleados') {
+            // --- 1. RESET DE VISIBILIDAD Y VALIDACIÓN ---
+            [inputDocDiv, inputTipoDocDiv, inputDirDiv, inputCelDiv, inputEmDiv].forEach(d => d?.classList.remove('hidden'));
+            [divTipo, divProd, divLinPadre].forEach(d => d?.classList.add('hidden'));
+
+            // VOLVEMOS A PONER REQUIRED POR DEFECTO
+            if (form.elements['documento']) {
+                form.elements['documento'].required = true;
+                form.elements['documento'].readOnly = false;
+            }
+            if (labelRazon) labelRazon.innerText = "Razón Social / Nombre Completo";
+
+            // --- 2. CONFIGURACIÓN SEGÚN PESTAÑA ---
+            if (currentTab === 'lineas' || currentTab === 'clases') {
+                // OCULTAMOS TODO MENOS EL NOMBRE
+                [inputDocDiv, inputTipoDocDiv, inputDirDiv, inputCelDiv, inputEmDiv, divTipo].forEach(d => d?.classList.add('hidden'));
+
+                // IMPORTANTE: QUITAMOS EL REQUERIMIENTO PARA QUE DEJE GUARDAR
+                if (form.elements['documento']) form.elements['documento'].required = false;
+
+                if (labelRazon) labelRazon.innerText = "Nombre de la " + labels[currentTab].singular;
+
+                if (currentTab === 'clases' && divLinPadre) {
+                    divLinPadre.classList.remove('hidden');
+                    try {
+                        const resL = await fetch('/api/lineas');
+                        const lineas = await resL.json();
+                        const selectLP = document.getElementById('selectLineaPadre');
+                        if (selectLP) {
+                            selectLP.innerHTML = lineas.map(l => `<option value="${l.ID}">${l.Nombre}</option>`).join('');
+                        }
+                    } catch (e) { console.error("Error cargando líneas:", e); }
+                }
+            }
+            else if (currentTab === 'empleados' && divTipo) {
                 divTipo.classList.remove('hidden');
                 if (tiposEmpleadoCache.length === 0) {
-                    const resT = await fetch('/api/tipo-empleado');
-                    tiposEmpleadoCache = await resT.json();
-                    document.getElementById('selectTipoEmpleado').innerHTML = tiposEmpleadoCache.map(t => `<option value="${t.idTipo}">${t.descripcion}</option>`).join('');
+                    try {
+                        const resT = await fetch('/api/tipo-empleado');
+                        tiposEmpleadoCache = await resT.json();
+                        const selectTE = document.getElementById('selectTipoEmpleado');
+                        if (selectTE) selectTE.innerHTML = tiposEmpleadoCache.map(t => `<option value="${t.idTipo}">${t.descripcion}</option>`).join('');
+                    } catch (e) { }
                 }
-            } else { divTipo.classList.add('hidden'); }
+            }
+            else if (currentTab === 'productos' && divProd) {
+                divProd.classList.remove('hidden');
+                if (labelRazon) labelRazon.innerText = "Nombre del Producto";
+            }
 
+            // --- 3. MODO EDICIÓN ---
             if (id) {
                 modalTitle.innerText = `Editar ${labels[currentTab].singular}`;
                 btnSubmit.innerText = `Actualizar ${labels[currentTab].singular}`;
-                const res = await fetch(`/api/${currentTab}/${id}`);
-                const data = await res.json();
+                try {
+                    const res = await fetch(`/api/${currentTab}/${id}`);
+                    const data = await res.json();
+                    if (form.elements['razon']) form.elements['razon'].value = data.Nombre || data.nombre || data.Razon || "";
+                    if (currentTab === 'clases' && form.elements['codLineaPadre']) form.elements['codLineaPadre'].value = data.CodLinea || "";
 
-                form.elements['tipoDoc'].value = data.tipoDoc || data.tipodoc || "1";
-                form.elements['documento'].value = data.Documento || data.documento || "";
-                form.elements['razon'].value = data.Razon || data.Nombre || data.razon || data.nombre || "";
-                form.elements['direccion'].value = data.Direccion || data.Direc1 || data.direccion || data.direc1 || "";
-                form.elements['celular'].value = data.Celular || data.Telefono1 || data.celular || data.telefono1 || "";
-                form.elements['email'].value = data.Email || data.email || "";
-                if (currentTab === 'empleados') form.elements['tipo'].value = data.Tipo || data.tipo || "";
+                    if (currentTab !== 'lineas' && currentTab !== 'clases') {
+                        if (form.elements['tipoDoc']) form.elements['tipoDoc'].value = data.tipoDoc || "1";
+                        if (form.elements['documento']) form.elements['documento'].value = data.Documento || data.CodPro || "";
+                        if (form.elements['direccion']) form.elements['direccion'].value = data.Direccion || data.Direc1 || "";
+                        if (form.elements['celular']) form.elements['celular'].value = data.Celular || data.Telefono1 || "";
+                        if (form.elements['email']) form.elements['email'].value = data.Email || "";
+                        if (currentTab === 'empleados' && form.elements['tipo']) form.elements['tipo'].value = data.Tipo || "";
+                    }
+                } catch (err) { }
             } else {
                 modalTitle.innerText = `Nuevo ${labels[currentTab].singular}`;
                 btnSubmit.innerText = `Guardar ${labels[currentTab].singular}`;

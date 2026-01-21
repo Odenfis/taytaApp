@@ -272,6 +272,94 @@ app.patch('/api/empleados/delete/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
+// --- API DE LÍNEAS Y CLASES (VERSIÓN CORREGIDA) ---
+
+// 1. Listar
+app.get('/api/:tabla', async (req, res, next) => {
+    const { tabla } = req.params;
+    if (tabla !== 'lineas' && tabla !== 'clases') return next();
+
+    const search = req.query.search || '';
+    try {
+        const pool = await poolPromise;
+        let query = "";
+        if (tabla === 'lineas') {
+            query = `SELECT CodLinea as ID, Nombre FROM Lineas WHERE Nombre LIKE @search AND Activo = 1 ORDER BY Nombre ASC`;
+        } else {
+            query = `SELECT C.CodClase as ID, C.Nombre, L.Nombre as LineaPadre 
+                     FROM Clases C 
+                     LEFT JOIN Lineas L ON C.CodLinea = L.CodLinea 
+                     WHERE C.Nombre LIKE @search AND C.Activo = 1 ORDER BY C.Nombre ASC`;
+        }
+        const result = await pool.request().input('search', sql.NVarChar, `%${search}%`).query(query);
+        res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 2. Obtener uno
+app.get('/api/:tabla/:id', async (req, res, next) => {
+    const { tabla, id } = req.params;
+    if (tabla !== 'lineas' && tabla !== 'clases') return next();
+    const idName = tabla === 'lineas' ? 'CodLinea' : 'CodClase';
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().input('id', sql.Int, id).query(`SELECT * FROM ${tabla} WHERE ${idName} = @id`);
+        res.json(result.recordset[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 3. Guardar Nuevo
+app.post('/api/:tabla', async (req, res, next) => {
+    const { tabla } = req.params;
+    if (tabla !== 'lineas' && tabla !== 'clases') return next();
+    const { razon, codLineaPadre } = req.body;
+    try {
+        const pool = await poolPromise;
+        if (tabla === 'lineas') {
+            await pool.request().input('nom', sql.VarChar(50), razon).query(`INSERT INTO Lineas (Nombre, Activo) VALUES (@nom, 1)`);
+        } else {
+            // Para Clases, nos aseguramos que codLineaPadre sea un número
+            await pool.request()
+                .input('nom', sql.VarChar(50), razon)
+                .input('lin', sql.Int, parseInt(codLineaPadre))
+                .query(`INSERT INTO Clases (Nombre, CodLinea, Activo) VALUES (@nom, @lin, 1)`);
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 4. Actualizar
+app.put('/api/:tabla/:id', async (req, res, next) => {
+    const { tabla, id } = req.params;
+    if (tabla !== 'lineas' && tabla !== 'clases') return next();
+    const { razon, codLineaPadre } = req.body;
+    const idName = tabla === 'lineas' ? 'CodLinea' : 'CodClase';
+    try {
+        const pool = await poolPromise;
+        if (tabla === 'lineas') {
+            await pool.request().input('id', sql.Int, id).input('nom', sql.VarChar(50), razon).query(`UPDATE Lineas SET Nombre = @nom WHERE CodLinea = @id`);
+        } else {
+            await pool.request().input('id', sql.Int, id).input('nom', sql.VarChar(50), razon).input('lin', sql.Int, codLineaPadre).query(`UPDATE Clases SET Nombre = @nom, CodLinea = @lin WHERE CodClase = @id`);
+        }
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+});
+
+// 5. Borrado Lógico (NUEVA RUTA FALTANTE)
+app.patch('/api/:tabla/delete/:id', async (req, res, next) => {
+    const { tabla, id } = req.params;
+    if (tabla !== 'lineas' && tabla !== 'clases') return next();
+    const idName = tabla === 'lineas' ? 'CodLinea' : 'CodClase';
+    try {
+        const pool = await poolPromise;
+        await pool.request().input('id', sql.Int, id).query(`UPDATE ${tabla} SET Activo = 0 WHERE ${idName} = @id`);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
 // --- API PRODUCTOS (PLACEHOLDER PARA EVITAR ERRORES) ---
 app.get('/api/productos', async (req, res) => { res.json([]); });
 
