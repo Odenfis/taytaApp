@@ -360,8 +360,132 @@ app.patch('/api/:tabla/delete/:id', async (req, res, next) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// --- API PRODUCTOS (PLACEHOLDER PARA EVITAR ERRORES) ---
-app.get('/api/productos', async (req, res) => { res.json([]); });
+// --- API DE PRODUCTOS (VERSIÓN DEFINITIVA) ---
+
+// 1. Configuración y Autogeneración de Código
+app.get('/api/productos-config', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const lineas = await pool.request().query("SELECT CodLinea, Nombre FROM Lineas WHERE Activo = 1");
+        const clases = await pool.request().query("SELECT CodClase, Nombre, CodLinea FROM Clases WHERE Activo = 1");
+        const proveedores = await pool.request().query("SELECT CodProv, Razon FROM Proveedores WHERE Eliminado = 0");
+        const tipos = await pool.request().query("SELECT idTipoPro, descripcion FROM TipoProducto");
+        const unidades = await pool.request().query("SELECT idUnimed, descripcion FROM UnidadMedida");
+        const igvs = await pool.request().query("SELECT RTRIM(c_describe) as c_describe, conversion FROM Tablas WHERE n_codtabla = 1");
+
+        const lastCode = await pool.request().query("SELECT MAX(CodPro) as last FROM Productos");
+        let nextCode = "T000001";
+        if (lastCode.recordset[0].last) {
+            let num = parseInt(lastCode.recordset[0].last.replace(/[^0-9]/g, '')) + 1;
+            nextCode = 'T' + num.toString().padStart(6, '0');
+        }
+
+        res.json({
+            lineas: lineas.recordset, clases: clases.recordset, proveedores: proveedores.recordset,
+            tipos: tipos.recordset, unidades: unidades.recordset, igv: igvs.recordset, nextCode
+        });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 2. Listar Productos
+app.get('/api/productos', async (req, res) => {
+    const search = req.query.search || '';
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('search', sql.NVarChar, `%${search}%`)
+            .query(`SELECT TOP 50 P.CodPro, P.Nombre, P.Stock, P.PventaMi as Precio, L.Nombre as LineaNombre 
+                    FROM Productos P 
+                    LEFT JOIN Lineas L ON P.Clinea = L.CodLinea 
+                    WHERE (P.CodPro LIKE @search OR P.Nombre LIKE @search) AND P.Eliminado = 0 
+                    ORDER BY P.CodPro DESC`);
+        res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 3. Registrar Producto (POST)
+app.post('/api/productos', async (req, res) => {
+    const { codigo, razon, codBar, linea, clase, proveedor, peso, stock, afecto, tipoPro, unidad, costo, pVenta } = req.body;
+    try {
+        const pool = await poolPromise;
+        // Normalizamos afecto: si viene true, "on" o 1, es 1.
+        const isAfec = (afecto === true || afecto === 'on' || afecto === 1 || afecto === 'true') ? 1 : 0;
+
+        await pool.request()
+            .input('cod', sql.Char(10), codigo)
+            .input('bar', sql.Char(15), codBar || '')
+            .input('lin', sql.Int, parseInt(linea))
+            .input('cla', sql.Int, parseInt(clase))
+            .input('nom', sql.VarChar(70), razon)
+            .input('prov', sql.Char(4), proveedor)
+            .input('pes', sql.Decimal(9, 3), parseFloat(peso) || 0)
+            .input('stk', sql.Decimal(9, 2), parseFloat(stock) || 0)
+            .input('afec', sql.Bit, isAfec)
+            .input('tip', sql.Int, parseInt(tipoPro))
+            .input('uni', sql.Int, parseInt(unidad))
+            .input('cosR', sql.Money, parseFloat(costo) || 0)
+            .input('cosB', sql.Money, (parseFloat(costo) || 0) / 1.18)
+            .input('preR', sql.Money, parseFloat(pVenta) || 0)
+            .input('preB', sql.Money, (parseFloat(pVenta) || 0) / 1.10)
+            .query(`INSERT INTO Productos (CodPro, CodBar, Clinea, Clase, Nombre, CodProv, Peso, Stock, Afecto, Tipo, Unimed, CosReal, Costo, PventaMi, PventaMa, Eliminado, AfecFle) 
+                    VALUES (@cod, @bar, @lin, @cla, @nom, @prov, @pes, @stk, @afec, @tip, @uni, @cosR, @cosB, @preR, @preB, 0, 0)`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Error al registrar:", err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 4. Obtener un producto (para Editar)
+app.get('/api/productos/:id', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().input('id', sql.Char(10), req.params.id).query('SELECT * FROM Productos WHERE CodPro = @id');
+        res.json(result.recordset[0]);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 5. Actualizar Producto (PUT)
+app.put('/api/productos/:id', async (req, res) => {
+    const { razon, codBar, linea, clase, proveedor, peso, stock, afecto, tipoPro, unidad, costo, pVenta } = req.body;
+    try {
+        const pool = await poolPromise;
+        const isAfec = (afecto === true || afecto === 'on' || afecto === 1 || afecto === 'true') ? 1 : 0;
+
+        await pool.request()
+            .input('id', sql.Char(10), req.params.id.trim())
+            .input('bar', sql.Char(15), codBar || '')
+            .input('lin', sql.Int, parseInt(linea))
+            .input('cla', sql.Int, parseInt(clase))
+            .input('nom', sql.VarChar(70), razon)
+            .input('prov', sql.Char(4), proveedor)
+            .input('pes', sql.Decimal(9, 3), parseFloat(peso) || 0)
+            .input('stk', sql.Decimal(9, 2), parseFloat(stock) || 0)
+            .input('afec', sql.Bit, isAfec)
+            .input('tip', sql.Int, parseInt(tipoPro))
+            .input('uni', sql.Int, parseInt(unidad))
+            .input('cosR', sql.Money, parseFloat(costo) || 0)
+            .input('cosB', sql.Money, (parseFloat(costo) || 0) / 1.18)
+            .input('preR', sql.Money, parseFloat(pVenta) || 0)
+            .input('preB', sql.Money, (parseFloat(pVenta) || 0) / 1.10)
+            .query(`UPDATE Productos 
+                    SET CodBar=@bar, Clinea=@lin, Clase=@cla, Nombre=@nom, CodProv=@prov, Peso=@pes, Stock=@stk, Afecto=@afec, Tipo=@tip, Unimed=@uni, CosReal=@cosR, Costo=@cosB, PventaMi=@preR, PventaMa=@preB 
+                    WHERE CodPro=@id`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Error al actualizar:", err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 6. Eliminar Producto (PATCH)
+app.patch('/api/productos/delete/:id', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        await pool.request().input('id', sql.Char(10), req.params.id).query('UPDATE Productos SET Eliminado = 1 WHERE CodPro = @id');
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {

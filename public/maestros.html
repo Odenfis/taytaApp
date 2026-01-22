@@ -146,6 +146,103 @@
                         <input type="email" name="email"
                             class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent p-3 text-sm outline-none focus:ring-2 focus:ring-sky-400">
                     </div>
+                    <!-- SECCIÓN ESPECÍFICA PARA PRODUCTOS (GRID) -->
+                    <div id="divProductos" class="md:col-span-2 hidden">
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Cod.
+                                    Barras</label>
+                                <input type="text" name="codBar"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none focus:ring-2 focus:ring-sky-400">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Línea</label>
+                                <select id="selectLineaPro" name="linea"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none"></select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Tipo
+                                    Producto</label>
+                                <select id="selectTipoPro" name="tipoPro"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none"></select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Clase</label>
+                                <select id="selectClasePro" name="clase"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none"></select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">U.
+                                    Medida</label>
+                                <select id="selectUnidadPro" name="unidad"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none"></select>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label
+                                    class="block text-[10px] font-black uppercase text-slate-400 mb-1">Proveedor</label>
+                                <select id="selectProvPro" name="proveedor"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none"></select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Peso</label>
+                                <input type="number" name="peso" value="0" step="0.001"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Stock</label>
+                                <input type="number" name="stock" value="0"
+                                    class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-sm outline-none">
+                            </div>
+                            <div class="md:col-span-4 flex items-center gap-2 py-2">
+                                <input type="checkbox" name="afecto" id="afectoIGV"
+                                    class="size-5 rounded border-slate-300 text-sky-500 focus:ring-sky-400" checked>
+                                <label for="afectoIGV"
+                                    class="text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                                    Producto Afecto al IGV
+                                </label>
+                            </div>
+
+                            <!-- Bloque de Precios y Costos -->
+                            <div
+                                class="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 mt-2 p-3 bg-sky-500/5 rounded-xl border border-sky-500/10">
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-sky-600 mb-1">Costo Real
+                                        (Inc. IGV)</label>
+                                    <input type="number" step="0.01" id="costoReal" name="costo"
+                                        oninput="calcPrecios('costo')"
+                                        class="w-full rounded-xl border-sky-200 bg-white p-2 text-sm font-bold text-sky-700 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">P. Costo
+                                        (Sin IGV)</label>
+                                    <input type="text" id="costoSinIgv" readonly
+                                        class="w-full rounded-xl border-none bg-slate-100 p-2 text-sm text-slate-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-emerald-600 mb-1">Precio
+                                        Final (Inc. IGV)</label>
+                                    <input type="number" step="0.01" id="precioReal" name="pVenta"
+                                        oninput="calcPrecios('venta')"
+                                        class="w-full rounded-xl border-emerald-200 bg-white p-2 text-sm font-bold text-emerald-700 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Valor
+                                        Venta (Sin IGV)</label>
+                                    <input type="text" id="precioSinIgv" readonly
+                                        class="w-full rounded-xl border-none bg-slate-100 p-2 text-sm text-slate-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Campo dinámico para Tipo de Empleado (Solo visible en Empleados) -->
                     <div id="divTipoEmpleado" class="md:col-span-2 hidden">
                         <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Rol / Tipo de
@@ -174,10 +271,13 @@
                 </form>
             </div>
         </div>
+
+
     </div>
     <script>
         let currentTab = 'clientes';
         let tiposEmpleadoCache = [];
+        let igvConfig = { xcosto: 0, xventa: 0 }; // Se llenará desde la BD     
 
         const labels = {
             'clientes': { singular: 'Cliente', plural: 'Clientes' },
@@ -189,6 +289,19 @@
         };
 
         // --- FUNCIÓN DE INICIALIZACIÓN ROBUSTA ---
+
+        function calcPrecios(tipo) {
+            if (tipo === 'costo') {
+                const val = parseFloat(document.getElementById('costoReal').value) || 0;
+                // Si en BD conversion es 0.18, divide entre 1.18
+                document.getElementById('costoSinIgv').value = (val / (1 + igvConfig.xcosto)).toFixed(2);
+            } else {
+                const val = parseFloat(document.getElementById('precioReal').value) || 0;
+                // Si en BD conversion es 0.10, divide entre 1.10
+                document.getElementById('precioSinIgv').value = (val / (1 + igvConfig.xventa)).toFixed(2);
+            }
+        }
+
         async function initSystem() {
             console.log("Iniciando El Tayta System...");
 
@@ -214,6 +327,9 @@
         window.addEventListener('load', initSystem);
 
         // --- FUNCIONES COMPLEMENTARIAS ---
+
+
+
         async function loadData() {
             const searchInput = document.getElementById('searchInput');
             const search = searchInput ? searchInput.value : "";
@@ -260,6 +376,8 @@
                     const nombre = item.Razon || item.razon || item.Nombre || item.nombre || '---';
                     const fono = item.Celular || item.celular || item.Telefono1 || item.telefono1 || '---';
 
+
+
                     // --- LÓGICA DE COLUMNA 3 ---
                     let col3Content = '';
                     if (currentTab === 'empleados') {
@@ -273,7 +391,7 @@
                         col3Content = `<div class="text-slate-400 text-xs">${dir}</div>`;
                     }
 
-                    const col4Content = item.PventaMi || (currentTab === 'lineas' || currentTab === 'clases' ? '' : fono);
+                    const col4Content = item.Precio || item.PventaMi || (currentTab === 'lineas' || currentTab === 'clases' ? '' : fono);
 
                     return `<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-slate-800">
                 <td class="px-6 py-4 font-bold text-sky-500">${doc}</td>
@@ -290,58 +408,6 @@
                 tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-400 italic">Error de conexión.</td></tr>`;
             }
         }
-        /*
-        async function loadData() {
-            const searchInput = document.getElementById('searchInput');
-            const search = searchInput ? searchInput.value : "";
-            const tbody = document.getElementById('tableBody');
-            const thead = document.getElementById('tableHeader');
-
-            if (!tbody || !thead) return;
-
-            // Renderizar Cabeceras
-            let headers = '';
-            if (currentTab === 'clientes') headers = '<th class="px-6 py-4">Documento</th><th class="px-6 py-4">Razón Social</th><th class="px-6 py-4">Dirección</th><th class="px-6 py-4">Celular</th>';
-            else if (currentTab === 'proveedores') headers = '<th class="px-6 py-4">RUC / Doc</th><th class="px-6 py-4">Proveedor</th><th class="px-6 py-4">Dirección</th><th class="px-6 py-4">Teléfono</th>';
-            else if (currentTab === 'empleados') headers = '<th class="px-6 py-4">DNI / Doc</th><th class="px-6 py-4">Empleado</th><th class="px-6 py-4">Cargo / Tipo</th><th class="px-6 py-4">Celular</th>';
-            else headers = '<th class="px-6 py-4">Código</th><th class="px-6 py-4">Descripción</th><th class="px-6 py-4">Categoría</th><th class="px-6 py-4">Precio</th>';
-
-            thead.innerHTML = headers + '<th class="px-6 py-4 text-right">Acciones</th>';
-            tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic animate-pulse">Cargando registros de ${currentTab}...</td></tr>`;
-
-            try {
-                const res = await fetch(`/api/${currentTab}?search=${encodeURIComponent(search)}`);
-                if (!res.ok) throw new Error("Error en respuesta");
-                const data = await res.json();
-
-                if (!Array.isArray(data) || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic">No se encontraron registros en ${currentTab}</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = data.map(item => {
-                    const id = item.Codclie || item.codclie || item.CodProv || item.codprov || item.Codemp || item.codemp || item.CodPro || '---';
-                    const nombre = item.Razon || item.razon || item.Nombre || item.nombre || '---';
-                    const doc = item.Documento || item.documento || item.CodPro || '---';
-                    const col3 = item.Direccion || item.direccion || item.Direc1 || item.direc1 || item.TipoNombre || '---';
-                    const col4 = item.Celular || item.celular || item.Telefono1 || item.telefono1 || item.PventaMi || '---';
-
-                    return `<tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors border-b border-slate-100 dark:border-slate-800">
-                    <td class="px-6 py-4 font-bold text-sky-500">${doc}</td>
-                    <td class="px-6 py-4 font-medium">${nombre}</td>
-                    <td class="px-6 py-4 text-slate-400 text-xs">${col3}</td>
-                    <td class="px-6 py-4">${col4}</td>
-                    <td class="px-6 py-4 text-right flex justify-end gap-2">
-                        <button onclick="openModal('${id}')" class="p-2 text-sky-500 hover:bg-sky-500/10 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">edit</span></button>
-                        <button onclick="deleteRecord('${id}', '${String(nombre).replace(/'/g, "\\'")}')" class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">delete</span></button>
-                    </td>
-                </tr>`;
-                }).join('');
-            } catch (err) {
-                console.error("Fallo en loadData:", err);
-                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-400 italic">No se pudo cargar la información. Intente refrescar.</td></tr>`;
-            }
-        }*/
 
         async function changeTab(tab) {
             currentTab = tab;
@@ -386,74 +452,101 @@
             form.reset();
             document.getElementById('clientId').value = id || "";
 
-            // --- 1. RESET DE VISIBILIDAD Y VALIDACIÓN ---
+            // --- RESET ---
             [inputDocDiv, inputTipoDocDiv, inputDirDiv, inputCelDiv, inputEmDiv].forEach(d => d?.classList.remove('hidden'));
             [divTipo, divProd, divLinPadre].forEach(d => d?.classList.add('hidden'));
 
-            // VOLVEMOS A PONER REQUIRED POR DEFECTO
             if (form.elements['documento']) {
                 form.elements['documento'].required = true;
                 form.elements['documento'].readOnly = false;
             }
             if (labelRazon) labelRazon.innerText = "Razón Social / Nombre Completo";
 
-            // --- 2. CONFIGURACIÓN SEGÚN PESTAÑA ---
+            // --- LÓGICA POR PESTAÑA ---
             if (currentTab === 'lineas' || currentTab === 'clases') {
-                // OCULTAMOS TODO MENOS EL NOMBRE
                 [inputDocDiv, inputTipoDocDiv, inputDirDiv, inputCelDiv, inputEmDiv, divTipo].forEach(d => d?.classList.add('hidden'));
-
-                // IMPORTANTE: QUITAMOS EL REQUERIMIENTO PARA QUE DEJE GUARDAR
                 if (form.elements['documento']) form.elements['documento'].required = false;
-
                 if (labelRazon) labelRazon.innerText = "Nombre de la " + labels[currentTab].singular;
 
                 if (currentTab === 'clases' && divLinPadre) {
                     divLinPadre.classList.remove('hidden');
-                    try {
-                        const resL = await fetch('/api/lineas');
-                        const lineas = await resL.json();
-                        const selectLP = document.getElementById('selectLineaPadre');
-                        if (selectLP) {
-                            selectLP.innerHTML = lineas.map(l => `<option value="${l.ID}">${l.Nombre}</option>`).join('');
-                        }
-                    } catch (e) { console.error("Error cargando líneas:", e); }
+                    const resL = await fetch('/api/lineas');
+                    const lineas = await resL.json();
+                    document.getElementById('selectLineaPadre').innerHTML = lineas.map(l => `<option value="${l.ID}">${l.Nombre}</option>`).join('');
                 }
             }
-            else if (currentTab === 'empleados' && divTipo) {
+            else if (currentTab === 'empleados') {
                 divTipo.classList.remove('hidden');
                 if (tiposEmpleadoCache.length === 0) {
-                    try {
-                        const resT = await fetch('/api/tipo-empleado');
-                        tiposEmpleadoCache = await resT.json();
-                        const selectTE = document.getElementById('selectTipoEmpleado');
-                        if (selectTE) selectTE.innerHTML = tiposEmpleadoCache.map(t => `<option value="${t.idTipo}">${t.descripcion}</option>`).join('');
-                    } catch (e) { }
+                    const resT = await fetch('/api/tipo-empleado');
+                    tiposEmpleadoCache = await resT.json();
+                    document.getElementById('selectTipoEmpleado').innerHTML = tiposEmpleadoCache.map(t => `<option value="${t.idTipo}">${t.descripcion}</option>`).join('');
                 }
             }
-            else if (currentTab === 'productos' && divProd) {
+            else if (currentTab === 'productos') {
                 divProd.classList.remove('hidden');
-                if (labelRazon) labelRazon.innerText = "Nombre del Producto";
+                [inputTipoDocDiv, inputDirDiv, inputCelDiv, inputEmDiv].forEach(d => d?.classList.add('hidden'));
+                if (labelRazon) labelRazon.innerText = "Descripción del Producto";
+
+                // Cargar Configuración de Productos (Código, Selects, IGVs)
+                const resC = await fetch('/api/productos-config');
+                const cfg = await resC.json();
+
+                // --- CONEXIÓN DINÁMICA CON LA TABLA 'TABLAS' ---
+                // Buscamos en el array igv lo que diga 'xcosto' y 'xventa'
+                const dbCosto = cfg.igv.find(i => i.c_describe === 'xcosto');
+                const dbVenta = cfg.igv.find(i => i.c_describe === 'xventa');
+
+                if (!id && form.elements['documento']) form.elements['documento'].value = cfg.nextCode;
+                if (form.elements['documento']) form.elements['documento'].readOnly = true;
+
+                // Asignamos los valores de conversión de la BD al objeto local
+                igvConfig.xcosto = dbCosto ? parseFloat(dbCosto.conversion) : 0.18;
+                igvConfig.xventa = dbVenta ? parseFloat(dbVenta.conversion) : 0.10;
+
+                console.log("IGVs cargados desde BD:", igvConfig);
+
+                // Llenar Selects
+                document.getElementById('selectLineaPro').innerHTML = cfg.lineas.map(l => `<option value="${l.CodLinea}">${l.Nombre}</option>`).join('');
+                document.getElementById('selectClasePro').innerHTML = cfg.clases.map(c => `<option value="${c.CodClase}">${c.Nombre}</option>`).join('');
+                document.getElementById('selectProvPro').innerHTML = cfg.proveedores.map(p => `<option value="${p.CodProv.trim()}">${p.Razon}</option>`).join('');
+                document.getElementById('selectTipoPro').innerHTML = cfg.tipos.map(t => `<option value="${t.idTipoPro}">${t.descripcion}</option>`).join('');
+                document.getElementById('selectUnidadPro').innerHTML = cfg.unidades.map(u => `<option value="${u.idUnimed}">${u.descripcion}</option>`).join('');
             }
 
-            // --- 3. MODO EDICIÓN ---
+            // --- MODO EDICIÓN ---
             if (id) {
                 modalTitle.innerText = `Editar ${labels[currentTab].singular}`;
                 btnSubmit.innerText = `Actualizar ${labels[currentTab].singular}`;
-                try {
-                    const res = await fetch(`/api/${currentTab}/${id}`);
-                    const data = await res.json();
-                    if (form.elements['razon']) form.elements['razon'].value = data.Nombre || data.nombre || data.Razon || "";
-                    if (currentTab === 'clases' && form.elements['codLineaPadre']) form.elements['codLineaPadre'].value = data.CodLinea || "";
+                const res = await fetch(`/api/${currentTab}/${id}`);
+                const data = await res.json();
 
-                    if (currentTab !== 'lineas' && currentTab !== 'clases') {
-                        if (form.elements['tipoDoc']) form.elements['tipoDoc'].value = data.tipoDoc || "1";
-                        if (form.elements['documento']) form.elements['documento'].value = data.Documento || data.CodPro || "";
-                        if (form.elements['direccion']) form.elements['direccion'].value = data.Direccion || data.Direc1 || "";
-                        if (form.elements['celular']) form.elements['celular'].value = data.Celular || data.Telefono1 || "";
-                        if (form.elements['email']) form.elements['email'].value = data.Email || "";
-                        if (currentTab === 'empleados' && form.elements['tipo']) form.elements['tipo'].value = data.Tipo || "";
-                    }
-                } catch (err) { }
+                if (form.elements['razon']) form.elements['razon'].value = data.Nombre || data.nombre || data.Razon || "";
+                if (currentTab === 'clases' && form.elements['codLineaPadre']) form.elements['codLineaPadre'].value = data.CodLinea || "";
+
+                if (currentTab === 'productos') {
+                    // Cargar valores en el form
+                    form.elements['documento'].value = data.CodPro.trim();
+                    form.elements['codBar'].value = data.CodBar ? data.CodBar.trim() : "";
+                    form.elements['linea'].value = data.Clinea;
+                    form.elements['clase'].value = data.Clase;
+                    form.elements['tipoPro'].value = data.Tipo;
+                    form.elements['unidad'].value = data.Unimed;
+                    form.elements['proveedor'].value = data.CodProv ? data.CodProv.trim() : "";
+                    form.elements['peso'].value = data.Peso;
+                    form.elements['stock'].value = data.Stock;
+                    form.elements['afecto'].checked = (data.Afecto === true || data.Afecto === 1 || data.afecto === true || data.afecto === 1);
+                    form.elements['costo'].value = data.CosReal;
+                    form.elements['pVenta'].value = data.PventaMi; // Usamos PventaMi que es el precio real en tabla  
+                    // Ejecutar cálculos visuales
+                    calcPrecios('costo'); calcPrecios('venta');
+                    form.elements['documento'].readOnly = true;
+                } else if (currentTab !== 'lineas' && currentTab !== 'clases') {
+                    form.elements['documento'].value = data.Documento || "";
+                    form.elements['direccion'].value = data.Direccion || data.Direc1 || "";
+                    form.elements['celular'].value = data.Celular || data.Telefono1 || "";
+                    form.elements['email'].value = data.Email || "";
+                }
             } else {
                 modalTitle.innerText = `Nuevo ${labels[currentTab].singular}`;
                 btnSubmit.innerText = `Guardar ${labels[currentTab].singular}`;
@@ -464,10 +557,21 @@
         document.getElementById('clientForm').onsubmit = async (e) => {
             e.preventDefault();
             const id = document.getElementById('clientId').value;
-            const formData = new FormData(e.target);
+            const form = e.target;
+            const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+
+            // --- REFUERZO DE DATOS CRÍTICOS ---
+            if (currentTab === 'productos') {
+                // Forzamos la captura del código desde el input, ya que FormData puede ignorar campos readonly
+                data.codigo = form.elements['documento'].value;
+                // Forzamos el booleano del checkbox
+                data.afecto = form.elements['afecto'].checked;
+            }
+
             if (currentTab === 'proveedores') data.telefono = data.celular;
 
+            // Definir URL y Método
             const url = id ? `/api/${currentTab}/${id}` : `/api/${currentTab}`;
             const method = id ? 'PUT' : 'POST';
 
@@ -477,12 +581,20 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                if (res.ok) {
-                    alert("Operación exitosa");
+
+                const result = await res.json();
+
+                if (res.ok && (result.success || result)) {
+                    alert("¡Operación exitosa!");
                     closeModal();
                     loadData();
-                } else { alert("Error al guardar"); }
-            } catch (err) { alert("Error de conexión"); }
+                } else {
+                    alert("Error: " + (result.message || "No se pudo procesar la solicitud"));
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error crítico de conexión");
+            }
         };
 
         function closeModal() { document.getElementById('clientModal').classList.add('hidden'); }
@@ -494,7 +606,7 @@
                 if (res.ok) loadData();
                 else alert("Error al eliminar");
             }
-        }        
+        }
     </script>
 </body>
 
